@@ -1,4 +1,4 @@
-const BACKEND_URL = import.meta.env.VITE_BACKEND_SERVER || 'https://invoice-backend-f6fz.onrender.com/';
+const BACKEND_URL = 'https://invoice-backend-f6fz.onrender.com/';
 
 export const API_BASE_URL = BACKEND_URL + 'api/';
 export const BASE_URL = BACKEND_URL;
