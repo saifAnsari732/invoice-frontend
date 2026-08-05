@@ -106,7 +106,7 @@ function AiAutoFill() {
       message.success({ content: 'AI Auto-filled successfully!', key: 'ai-parsing' });
     } catch (error) {
       console.error(error);
-      message.error({ content: 'AI Parsing failed. Check API key or image format.', key: 'ai-parsing' });
+      message.error({ content: `AI Parsing failed: ${error.message || 'Unknown error'}`, key: 'ai-parsing', duration: 5 });
     } finally {
       setLoading(false);
     }
