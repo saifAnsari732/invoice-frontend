@@ -2,10 +2,11 @@ import React, { useState } from 'react';
 import { Typography } from 'antd';
 import { useMoney } from '@/settings';
 import dayjs from 'dayjs';
+import html2pdf from 'html2pdf.js';
 
 const { Text, Title } = Typography;
 import { Button } from 'antd';
-import { PrinterOutlined } from '@ant-design/icons';
+import { PrinterOutlined, FilePdfOutlined } from '@ant-design/icons';
 
 export default function LiveInvoicePreview({ formValues, subTotal, taxTotal, total }) {
   const { amountFormatter, currency_symbol } = useMoney();
@@ -74,6 +75,18 @@ export default function LiveInvoicePreview({ formValues, subTotal, taxTotal, tot
     }, 250);
   };
   
+  const handleDownloadPDF = () => {
+    const element = document.getElementById('invoice-preview-container');
+    const opt = {
+      margin:       5,
+      filename:     `Invoice_${clientName || 'Draft'}.pdf`,
+      image:        { type: 'jpeg', quality: 0.98 },
+      html2canvas:  { scale: 2 },
+      jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+    html2pdf().from(element).set(opt).save();
+  };
+  
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
       <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
@@ -81,6 +94,9 @@ export default function LiveInvoicePreview({ formValues, subTotal, taxTotal, tot
           <Button onClick={() => setFontSize(f => Math.max(8, f - 1))}>A-</Button>
           <Button onClick={() => setFontSize(f => Math.min(24, f + 1))}>A+</Button>
         </Button.Group>
+        <Button icon={<FilePdfOutlined />} onClick={handleDownloadPDF} style={{ background: '#f5222d', color: '#fff' }}>
+          Download PDF
+        </Button>
         <Button type="primary" icon={<PrinterOutlined />} onClick={handlePrint}>
           Print Preview
         </Button>
