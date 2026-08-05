@@ -55,13 +55,16 @@ function AiAutoFill() {
       message.loading({ content: 'AI is analyzing the document...', key: 'ai-parsing' });
       
       const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-      // Using gemini-1.5-flash for speed and multimodal support (since user mentioned 3.5 but it's Gemini)
+      // Corrected to gemini-1.5-flash since 3.5-flash does not exist
       const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
       const imagePart = await fileToGenerativePart(file.originFileObj || file);
 
       const prompt = `You are a data extraction assistant. Parse this invoice or order image and extract the following details into a JSON format exactly matching this schema:
       {
+        "clientName": "string (Shop Name / Client Name)",
+        "clientAddress": "string (Full Address, City, State)",
+        "clientPhone": "string (Contact No / Mobile)",
         "ewayBillNumber": "string",
         "placeOfSupply": "string",
         "shipToAddress": "string",
@@ -91,6 +94,9 @@ function AiAutoFill() {
       const parsedData = JSON.parse(text);
       
       form.setFieldsValue({
+        clientName: parsedData.clientName,
+        clientAddress: parsedData.clientAddress,
+        clientPhone: parsedData.clientPhone,
         ewayBillNumber: parsedData.ewayBillNumber,
         placeOfSupply: parsedData.placeOfSupply,
         shipToAddress: parsedData.shipToAddress,
