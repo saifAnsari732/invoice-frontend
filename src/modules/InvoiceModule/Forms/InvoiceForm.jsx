@@ -55,9 +55,7 @@ function AiAutoFill() {
       message.loading({ content: 'AI is analyzing the document...', key: 'ai-parsing' });
       
       const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-      // Corrected to gemini-1.5-flash since 3.5-flash does not exist
-      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-
+      
       const imagePart = await fileToGenerativePart(file.originFileObj || file);
 
       const prompt = `You are a data extraction assistant. Parse this invoice or order image and extract the following details into a JSON format exactly matching this schema:
@@ -84,7 +82,17 @@ function AiAutoFill() {
       }
       Do not include markdown formatting or backticks, just the raw JSON.`;
 
-      const result = await model.generateContent([prompt, imagePart]);
+      let result;
+      try {
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
+        result = await model.generateContent([prompt, imagePart]);
+      } catch (e) {
+        // Fallback to gemini-pro-vision if the flash model is not available
+        console.warn("Flash model failed, falling back to gemini-pro-vision", e);
+        const fallbackModel = genAI.getGenerativeModel({ model: "gemini-pro-vision" });
+        result = await fallbackModel.generateContent([prompt, imagePart]);
+      }
+
       const response = await result.response;
       let text = response.text();
       
