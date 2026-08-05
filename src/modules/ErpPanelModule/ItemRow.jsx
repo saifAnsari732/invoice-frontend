@@ -53,43 +53,43 @@ export default function ItemRow({ field, remove, current = null }) {
 
   return (
     <Row gutter={[8, 8]} style={{ position: 'relative', marginBottom: '10px', paddingBottom: '10px', borderBottom: '1px dashed #ccc' }}>
-      <Col span={6}>
+      <Col md={7} sm={24}>
         <Form.Item name={[field.name, 'itemName']} rules={[{ required: true }]} label="Item Name">
           <Input placeholder="Item Name" />
         </Form.Item>
       </Col>
-      <Col span={3}>
+      <Col md={4} sm={12}>
         <Form.Item name={[field.name, 'hsn']} label="HSN/SAC">
           <Input placeholder="1514" />
         </Form.Item>
       </Col>
-      <Col span={4}>
+      <Col md={5} sm={12}>
         <Form.Item name={[field.name, 'brand']} label="Brand">
           <Input placeholder="ECO KISAN" />
         </Form.Item>
       </Col>
-      <Col span={2}>
+      <Col md={4} sm={12}>
         <Form.Item name={[field.name, 'count']} label="Count">
           <InputNumber style={{ width: '100%' }} />
         </Form.Item>
       </Col>
-      <Col span={3}>
+      <Col md={4} sm={12}>
         <Form.Item name={[field.name, 'size']} label="Size">
           <Input placeholder="1LTR" />
         </Form.Item>
       </Col>
-      <Col span={3}>
+      <Col md={4} sm={12}>
         <Form.Item name={[field.name, 'unit']} label="Unit">
           <Input placeholder="Box" />
         </Form.Item>
       </Col>
-      <Col span={3}>
+      <Col md={4} sm={12}>
         <Form.Item name={[field.name, 'quantity']} rules={[{ required: true }]} label="Qty">
           <InputNumber style={{ width: '100%' }} min={0} onChange={updateQt} />
         </Form.Item>
       </Col>
 
-      <Col span={4}>
+      <Col md={5} sm={12}>
         <Form.Item name={[field.name, 'price']} rules={[{ required: true }]} label="Price/Unit">
           <InputNumber
             className="moneyInput"
@@ -101,12 +101,12 @@ export default function ItemRow({ field, remove, current = null }) {
           />
         </Form.Item>
       </Col>
-      <Col span={3}>
+      <Col md={4} sm={12}>
         <Form.Item name={[field.name, 'gstPercentage']} label="GST (%)">
           <InputNumber style={{ width: '100%' }} min={0} max={100} />
         </Form.Item>
       </Col>
-      <Col span={5}>
+      <Col md={7} sm={24}>
         <Form.Item name={[field.name, 'total']} label="Total Amount">
           <Form.Item>
             <InputNumber
