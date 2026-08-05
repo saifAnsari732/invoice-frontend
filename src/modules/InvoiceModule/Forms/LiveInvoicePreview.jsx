@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Typography } from 'antd';
 import { useMoney } from '@/settings';
 import dayjs from 'dayjs';
@@ -9,12 +9,40 @@ import { PrinterOutlined } from '@ant-design/icons';
 
 export default function LiveInvoicePreview({ formValues, subTotal, taxTotal, total }) {
   const { amountFormatter, currency_symbol } = useMoney();
+  const [fontSize, setFontSize] = useState(13); // Default increased from 11 to 13
 
   const formatMoney = (amount) => {
     return currency_symbol + ' ' + amountFormatter({ amount });
   };
 
   const items = formValues?.items || [];
+  
+  let calcSubTotal = 0;
+  let calcTaxTotal = 0;
+  
+  const enrichedItems = items.map(item => {
+    const qty = Number(item?.quantity) || 0;
+    const price = Number(item?.price) || 0;
+    const itemBaseTotal = qty * price;
+    const gstPercent = Number(item?.gstPercentage) || 5;
+    const gstAmt = (itemBaseTotal * gstPercent) / 100;
+    
+    calcSubTotal += itemBaseTotal;
+    calcTaxTotal += gstAmt;
+    
+    return {
+      ...item,
+      calculatedBaseTotal: itemBaseTotal,
+      calculatedGstAmt: gstAmt,
+      gstPercent: gstPercent
+    };
+  });
+  
+  const calcGrandTotal = calcSubTotal + calcTaxTotal;
+
+  const displaySubTotal = subTotal > 0 ? subTotal : calcSubTotal;
+  const displayTaxTotal = taxTotal > 0 ? taxTotal : calcTaxTotal;
+  const displayGrandTotal = total > 0 ? total : calcGrandTotal;
   const clientName = formValues?.clientName || '';
   const clientAddress = formValues?.clientAddress || '';
   const clientPhone = formValues?.clientPhone || '';
@@ -48,7 +76,11 @@ export default function LiveInvoicePreview({ formValues, subTotal, taxTotal, tot
   
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-      <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+        <Button.Group>
+          <Button onClick={() => setFontSize(f => Math.max(8, f - 1))}>A-</Button>
+          <Button onClick={() => setFontSize(f => Math.min(24, f + 1))}>A+</Button>
+        </Button.Group>
         <Button type="primary" icon={<PrinterOutlined />} onClick={handlePrint}>
           Print Preview
         </Button>
@@ -60,7 +92,7 @@ export default function LiveInvoicePreview({ formValues, subTotal, taxTotal, tot
       border: '1px solid #ccc',
       boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
       fontFamily: 'Arial, sans-serif',
-      fontSize: '11px',
+      fontSize: `${fontSize}px`,
       color: '#000',
       minHeight: '842px', // A4 approx height
     }}>
@@ -71,7 +103,7 @@ export default function LiveInvoicePreview({ formValues, subTotal, taxTotal, tot
 
       <div style={{ border: '1px solid #000', marginBottom: '-1px', display: 'flex', padding: '10px' }}>
         <div style={{ flex: 1, paddingLeft: '15px' }}>
-          <div style={{ fontSize: '20px', fontWeight: 'bold', color: '#2b3990', marginBottom: '5px' }}>KISAN INDIA PLUS</div>
+          <img src="/company-Logo.webp" alt="Company Logo" style={{ maxHeight: '80px', maxWidth: '300px', marginBottom: '10px' }} />
           <div>11/3, Irrigation Colony, Lucknow</div>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '5px' }}>
             <div>
@@ -99,7 +131,7 @@ export default function LiveInvoicePreview({ formValues, subTotal, taxTotal, tot
           <div style={{ fontWeight: 'bold', backgroundColor: '#f0f0f0', padding: '3px 5px', margin: '-5px -5px 5px -5px', borderBottom: '1px solid #000' }}>
             Invoice Details:
           </div>
-          <table style={{ width: '100%', border: 'none', textAlign: 'left', fontSize: '11px' }}>
+          <table style={{ width: '100%', border: 'none', textAlign: 'left', fontSize: `${fontSize}px` }}>
             <tbody>
               <tr>
                 <td>No:</td>
@@ -129,7 +161,7 @@ export default function LiveInvoicePreview({ formValues, subTotal, taxTotal, tot
         <div>{formValues?.shipToAddress || clientAddress || 'Shipping Address'}</div>
       </div>
 
-      <table style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid #000', fontSize: '10px' }}>
+      <table style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid #000', fontSize: `${fontSize - 1}px` }}>
         <thead>
           <tr>
             <th style={{ border: '1px solid #000', padding: '3px', backgroundColor: '#f0f0f0' }}>#</th>
@@ -146,8 +178,7 @@ export default function LiveInvoicePreview({ formValues, subTotal, taxTotal, tot
           </tr>
         </thead>
         <tbody>
-          {items.map((item, index) => {
-            const gstAmt = (item?.total * (item?.gstPercentage || 5)) / 100 || 0;
+          {enrichedItems.map((item, index) => {
             return (
               <tr key={index}>
                 <td style={{ border: '1px solid #000', padding: '3px', textAlign: 'center' }}>{index + 1}</td>
@@ -163,25 +194,25 @@ export default function LiveInvoicePreview({ formValues, subTotal, taxTotal, tot
                 <td style={{ border: '1px solid #000', padding: '3px', textAlign: 'center' }}>{item?.unit}</td>
                 <td style={{ border: '1px solid #000', padding: '3px', textAlign: 'right' }}>{formatMoney(item?.price || 0)}</td>
                 <td style={{ border: '1px solid #000', padding: '3px', textAlign: 'right' }}>
-                  {formatMoney(gstAmt)}<br />
-                  ({item?.gstPercentage || 5}%)
+                  {formatMoney(item.calculatedGstAmt)}<br />
+                  ({item.gstPercent}%)
                 </td>
-                <td style={{ border: '1px solid #000', padding: '3px', textAlign: 'right' }}>{formatMoney(item?.total || 0)}</td>
+                <td style={{ border: '1px solid #000', padding: '3px', textAlign: 'right' }}>{formatMoney(item.calculatedBaseTotal)}</td>
               </tr>
             );
           })}
           
           <tr>
             <td colSpan="10" style={{ border: '1px solid #000', borderTop: '2px solid #000', padding: '5px', textAlign: 'right', fontWeight: 'bold' }}>Sub Total</td>
-            <td style={{ border: '1px solid #000', borderTop: '2px solid #000', padding: '5px', textAlign: 'right', fontWeight: 'bold' }}>{formatMoney(subTotal)}</td>
+            <td style={{ border: '1px solid #000', borderTop: '2px solid #000', padding: '5px', textAlign: 'right', fontWeight: 'bold' }}>{formatMoney(displaySubTotal)}</td>
           </tr>
           <tr>
             <td colSpan="10" style={{ border: '1px solid #000', padding: '5px', textAlign: 'right', fontWeight: 'bold' }}>Total Tax</td>
-            <td style={{ border: '1px solid #000', padding: '5px', textAlign: 'right', fontWeight: 'bold' }}>{formatMoney(taxTotal)}</td>
+            <td style={{ border: '1px solid #000', padding: '5px', textAlign: 'right', fontWeight: 'bold' }}>{formatMoney(displayTaxTotal)}</td>
           </tr>
           <tr>
             <td colSpan="10" style={{ border: '1px solid #000', padding: '5px', textAlign: 'right', fontWeight: 'bold' }}>Grand Total</td>
-            <td style={{ border: '1px solid #000', padding: '5px', textAlign: 'right', fontWeight: 'bold' }}>{formatMoney(total)}</td>
+            <td style={{ border: '1px solid #000', padding: '5px', textAlign: 'right', fontWeight: 'bold' }}>{formatMoney(displayGrandTotal)}</td>
           </tr>
         </tbody>
       </table>
