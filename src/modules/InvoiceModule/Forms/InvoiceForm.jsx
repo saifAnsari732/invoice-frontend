@@ -29,6 +29,7 @@ const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY || ("AQ.Ab8RN6KK" + "
 function AiAutoFill() {
   const form = Form.useFormInstance();
   const [loading, setLoading] = useState(false);
+  const [uploadKey, setUploadKey] = useState(Date.now());
 
   const fileToGenerativePart = async (file) => {
     return new Promise((resolve, reject) => {
@@ -110,6 +111,7 @@ function AiAutoFill() {
       message.error({ content: `AI Parsing failed: ${error.message || 'Unknown error'}`, key: 'ai-parsing', duration: 5 });
     } finally {
       setLoading(false);
+      setUploadKey(Date.now());
     }
   };
 
@@ -122,6 +124,7 @@ function AiAutoFill() {
         </Col>
         <Col>
           <Upload 
+            key={uploadKey}
             accept="image/*"
             showUploadList={false}
             beforeUpload={() => false}
