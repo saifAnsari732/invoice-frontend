@@ -82,16 +82,9 @@ function AiAutoFill() {
       }
       Do not include markdown formatting or backticks, just the raw JSON.`;
 
-      let result;
-      try {
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
-        result = await model.generateContent([prompt, imagePart]);
-      } catch (e) {
-        // Fallback to gemini-pro-vision if the flash model is not available
-        console.warn("Flash model failed, falling back to gemini-pro-vision", e);
-        const fallbackModel = genAI.getGenerativeModel({ model: "gemini-pro-vision" });
-        result = await fallbackModel.generateContent([prompt, imagePart]);
-      }
+      // Set exactly to gemini-3.5-flash as requested by user
+      const model = genAI.getGenerativeModel({ model: "gemini-3.5-flash" });
+      const result = await model.generateContent([prompt, imagePart]);
 
       const response = await result.response;
       let text = response.text();
